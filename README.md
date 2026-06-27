@@ -165,12 +165,28 @@ Nenhuma chave de API é necessária — yfinance e BCB SGS são públicos e não
 
 ## Deploy
 
-| Camada   | Plataforma       | Observação                                       |
-| -------- | ---------------- | -------------------------------------------------- |
-| Backend  | Railway / Render | free tier cobre o uso de portfólio                |
-| Frontend | Vercel           | `npm run build` → deploy automático via GitHub |
+### Frontend — Vercel
 
-Configure `CORS_ORIGINS` no backend com a URL final do frontend antes de subir para produção.
+1. Importe o repositório no [Vercel](https://vercel.com/new)
+2. **Não altere** Root Directory (o `vercel.json` raiz já configura o build do `frontend/`)
+3. Adicione a variável de ambiente:
+   ```
+   VITE_API_URL = https://<seu-backend>.railway.app
+   ```
+4. Deploy → Vercel faz o build com `npm --prefix frontend run build` automaticamente
+
+### Backend — Railway
+
+1. Crie um novo projeto no [Railway](https://railway.app) a partir do repositório
+2. Configure o serviço para usar `backend/` como Root Directory
+3. Adicione as variáveis de ambiente:
+   ```
+   CORS_ORIGINS=["https://<seu-app>.vercel.app"]
+   CACHE_TTL_HOURS=24
+   ```
+4. O `Procfile` já define o comando de start: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+
+> **Ordem:** suba o backend primeiro para ter a URL antes de configurar o Vercel.
 
 ## Licença
 
