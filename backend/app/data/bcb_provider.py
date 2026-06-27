@@ -9,7 +9,7 @@ from app.core.exceptions import DataProviderError
 BCB_BASE = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.{series}/dados"
 CDI_SERIES = 12
 SELIC_SERIES = 11
-TIMEOUT_SECONDS = 10.0
+TIMEOUT_SECONDS = 30.0
 
 
 class BCBProvider:
