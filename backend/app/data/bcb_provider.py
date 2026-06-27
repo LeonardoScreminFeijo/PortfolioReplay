@@ -9,7 +9,7 @@ from app.core.exceptions import DataProviderError
 BCB_BASE = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.{series}/dados"
 CDI_SERIES = 12
 SELIC_SERIES = 11
-TIMEOUT_SECONDS = 10.0
+TIMEOUT_SECONDS = 30.0
 
 
 class BCBProvider:
@@ -35,7 +35,7 @@ class BCBProvider:
 
         try:
             async with httpx.AsyncClient(timeout=TIMEOUT_SECONDS) as client:
-                response = await client.get(url, params=params)
+                response = await client.get(url, params=params, headers={"Accept": "application/json"})
                 response.raise_for_status()
         except httpx.TimeoutException as e:
             raise DataProviderError(f"BCB API timeout for series {series}") from e

@@ -1,8 +1,18 @@
+import json
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.routers import benchmarks, portfolio
+
+
+def _parse_cors(raw: str) -> list[str]:
+    raw = raw.strip()
+    if raw.startswith("["):
+        return json.loads(raw)
+    return [o.strip() for o in raw.split(",") if o.strip()]
+
 
 app = FastAPI(
     title="PortfolioReplay API",
@@ -12,7 +22,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
+    allow_origins=_parse_cors(settings.cors_origins),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
