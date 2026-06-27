@@ -32,6 +32,7 @@ class SimulateRequest(BaseModel):
     initial_value: float = 1000.0
     monthly_contribution: float = 0.0
     rebalance_frequency: Literal["none", "monthly", "quarterly"] = "none"
+    projection_months: int | None = None
 
     @field_validator("assets")
     @classmethod
@@ -52,6 +53,13 @@ class SimulateRequest(BaseModel):
     def contribution_non_negative(cls, v: float) -> float:
         if v < 0:
             raise ValueError("monthly_contribution must be >= 0")
+        return v
+
+    @field_validator("projection_months")
+    @classmethod
+    def projection_months_valid(cls, v: int | None) -> int | None:
+        if v is not None and not (1 <= v <= 240):
+            raise ValueError("projection_months must be between 1 and 240")
         return v
 
     @model_validator(mode="after")
@@ -84,9 +92,19 @@ class MetricsOut(BaseModel):
     volatility: float
 
 
+class ProjectionBand(BaseModel):
+    date: date
+    p10: float
+    p25: float
+    p50: float
+    p75: float
+    p90: float
+
+
 class SimulateResponse(BaseModel):
     timeline: list[TimelinePointOut]
     metrics: MetricsOut
+    projection: list[ProjectionBand] | None = None
 
 
 class BenchmarkPoint(BaseModel):

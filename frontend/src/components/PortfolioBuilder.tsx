@@ -45,6 +45,7 @@ export default function PortfolioBuilder({ onSimulate, loading, defaults }: Prop
   const [initialValue, setInitialValue] = useState(defaults.initialValue)
   const [monthlyContrib, setMonthlyContrib] = useState(defaults.monthlyContrib)
   const [rebalFreq, setRebalFreq] = useState<RebalanceFrequency>(defaults.rebalFreq)
+  const [projectionMonths, setProjectionMonths] = useState<number>(defaults.projectionMonths)
   const [validationError, setValidationError] = useState<string | null>(null)
   const [tickerHints, setTickerHints] = useState<Record<number, boolean>>({})
 
@@ -87,6 +88,7 @@ export default function PortfolioBuilder({ onSimulate, loading, defaults }: Prop
       initial_value: parseFloat(initialValue),
       monthly_contribution: parseFloat(monthlyContrib) || 0,
       rebalance_frequency: rebalFreq,
+      ...(projectionMonths > 0 ? { projection_months: projectionMonths } : {}),
     })
   }
 
@@ -235,6 +237,35 @@ export default function PortfolioBuilder({ onSimulate, loading, defaults }: Prop
             <option value="none">Sem rebalanceamento</option>
             <option value="monthly">Mensal</option>
             <option value="quarterly">Trimestral</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="border-t border-white/[0.06]" />
+
+      {/* Projecao */}
+      <div className="space-y-3">
+        <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-medium">
+          Projecao futura
+        </span>
+        <div>
+          <label className={LABEL_CLASS}>Horizonte (Monte Carlo)</label>
+          <select
+            value={projectionMonths}
+            onChange={e => setProjectionMonths(Number(e.target.value))}
+            className={`${INPUT_CLASS} appearance-none cursor-pointer pr-8`}
+            style={{
+              backgroundImage: SELECT_ARROW,
+              backgroundPosition: 'right 0.75rem center',
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: '1rem',
+            }}
+          >
+            <option value={0}>Sem projecao</option>
+            <option value={12}>12 meses</option>
+            <option value={24}>24 meses</option>
+            <option value={60}>60 meses</option>
+            <option value={120}>120 meses</option>
           </select>
         </div>
       </div>

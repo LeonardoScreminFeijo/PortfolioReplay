@@ -22,6 +22,7 @@ function parseUrlDefaults(): PortfolioBuilderDefaults {
     initialValue: p.get('initial') ?? '1000',
     monthlyContrib: p.get('contrib') ?? '0',
     rebalFreq: (p.get('rebal') ?? 'none') as RebalanceFrequency,
+    projectionMonths: 0,
   }
 }
 
@@ -149,7 +150,7 @@ export default function App() {
           {data && !loading && (
             <>
               <MetricsPanel key={simCount} metrics={data.metrics} />
-              <PerformanceChart timeline={data.timeline} />
+              <PerformanceChart timeline={data.timeline} projection={data.projection} />
               {lastRequest && <ShareLink request={lastRequest} />}
             </>
           )}

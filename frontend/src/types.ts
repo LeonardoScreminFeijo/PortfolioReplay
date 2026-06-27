@@ -12,6 +12,7 @@ export interface SimulateRequest {
   initial_value: number
   monthly_contribution: number
   rebalance_frequency: RebalanceFrequency
+  projection_months?: number
 }
 
 export interface TimelinePoint {
@@ -28,9 +29,19 @@ export interface Metrics {
   volatility: number
 }
 
+export interface ProjectionBand {
+  date: string
+  p10: number
+  p25: number
+  p50: number
+  p75: number
+  p90: number
+}
+
 export interface SimulateResponse {
   timeline: TimelinePoint[]
   metrics: Metrics
+  projection?: ProjectionBand[]
 }
 
 export interface RowState {
@@ -44,4 +55,5 @@ export interface PortfolioBuilderDefaults {
   initialValue: string
   monthlyContrib: string
   rebalFreq: RebalanceFrequency
+  projectionMonths: number
 }
