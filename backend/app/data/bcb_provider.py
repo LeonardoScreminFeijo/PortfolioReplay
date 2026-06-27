@@ -35,7 +35,7 @@ class BCBProvider:
 
         try:
             async with httpx.AsyncClient(timeout=TIMEOUT_SECONDS) as client:
-                response = await client.get(url, params=params)
+                response = await client.get(url, params=params, headers={"Accept": "application/json"})
                 response.raise_for_status()
         except httpx.TimeoutException as e:
             raise DataProviderError(f"BCB API timeout for series {series}") from e
