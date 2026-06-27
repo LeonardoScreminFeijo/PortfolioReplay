@@ -9,7 +9,7 @@ import {
   YAxis,
 } from 'recharts'
 import type { TimelinePoint } from '../types'
-import { formatCurrency, formatShortDate } from '../utils/formatters'
+import { formatCurrency, formatShortDate, formatTooltipDate } from '../utils/formatters'
 
 interface Props {
   timeline: TimelinePoint[]
@@ -52,7 +52,7 @@ export default function PerformanceChart({ timeline }: Props) {
               const num = typeof value === 'number' ? value : Number(value ?? 0)
               return formatCurrency(num)
             }}
-            labelFormatter={(label) => formatShortDate(String(label ?? ''))}
+            labelFormatter={(label) => formatTooltipDate(String(label ?? ''))}
             contentStyle={{
               backgroundColor: '#18181b',
               border: '1px solid rgba(255,255,255,0.08)',

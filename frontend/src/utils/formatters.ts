@@ -12,3 +12,9 @@ export function formatShortDate(dateStr: string): string {
   const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]))
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
 }
+
+export function formatTooltipDate(dateStr: string): string {
+  const parts = dateStr.split('-')
+  const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]))
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+}
