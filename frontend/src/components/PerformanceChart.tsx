@@ -10,8 +10,19 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import type { TooltipProps } from 'recharts'
 import type { ProjectionBand, TimelinePoint } from '../types'
+
+interface TooltipPayloadItem {
+  dataKey: string
+  value: number | null | undefined
+  color?: string
+}
+
+interface CustomTooltipInput {
+  active?: boolean
+  payload?: TooltipPayloadItem[]
+  label?: string
+}
 import { formatCurrency, formatShortDate, formatTooltipDate } from '../utils/formatters'
 
 interface Props {
@@ -72,13 +83,13 @@ function buildChartData(timeline: TimelinePoint[], projection?: ProjectionBand[]
   return [...historical.slice(0, -1), bridge, ...projPoints]
 }
 
-function CustomTooltip({ active, payload, label }: TooltipProps<number, string>) {
+function CustomTooltip({ active, payload, label }: CustomTooltipInput) {
   if (!active || !payload?.length) return null
 
   const HIDDEN = new Set(['p10', 'p90_minus_p10'])
-  const hasHistorical = payload.some(p => p.dataKey === 'portfolio_value' && p.value != null)
+  const hasHistorical = payload.some((p: TooltipPayloadItem) => p.dataKey === 'portfolio_value' && p.value != null)
 
-  const items = payload.filter(p => {
+  const items = payload.filter((p: TooltipPayloadItem) => {
     if (HIDDEN.has(String(p.dataKey))) return false
     if (p.value == null) return false
     if (p.dataKey === 'p50' && hasHistorical) return false
@@ -102,7 +113,7 @@ function CustomTooltip({ active, payload, label }: TooltipProps<number, string>)
       <p style={{ color: '#71717a', marginBottom: '6px', fontSize: '11px' }}>
         {formatTooltipDate(String(label ?? ''))}
       </p>
-      {items.map(item => (
+      {items.map((item: TooltipPayloadItem) => (
         <p key={item.dataKey} style={{ color: '#e4e4e7', padding: '1px 0' }}>
           <span style={{ color: item.color }}>
             {NAME_MAP[String(item.dataKey)] ?? String(item.dataKey)}
