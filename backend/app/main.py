@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
+from app.routers import benchmarks, portfolio
 
 app = FastAPI(
     title="PortfolioReplay API",
@@ -16,6 +17,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(portfolio.router)
+app.include_router(benchmarks.router)
 
 
 @app.get("/health")
