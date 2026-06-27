@@ -46,6 +46,7 @@ export default function PortfolioBuilder({ onSimulate, loading, defaults }: Prop
   const [monthlyContrib, setMonthlyContrib] = useState(defaults.monthlyContrib)
   const [rebalFreq, setRebalFreq] = useState<RebalanceFrequency>(defaults.rebalFreq)
   const [validationError, setValidationError] = useState<string | null>(null)
+  const [tickerHints, setTickerHints] = useState<Record<number, boolean>>({})
 
   const weightSum = rows.reduce((acc, r) => acc + (parseFloat(r.weightStr) || 0), 0)
   const sumOk = Math.abs(weightSum - 100) < 0.1
@@ -60,6 +61,13 @@ export default function PortfolioBuilder({ onSimulate, loading, defaults }: Prop
 
   function updateRow(i: number, field: keyof RowState, value: string) {
     setRows(prev => prev.map((r, idx) => (idx === i ? { ...r, [field]: value } : r)))
+    if (field === 'ticker') setTickerHints(prev => ({ ...prev, [i]: false }))
+  }
+
+  function handleTickerBlur(i: number, value: string) {
+    const v = value.trim().toUpperCase()
+    const needsSuffix = v.length >= 4 && !v.includes('.') && !v.startsWith('^') && !v.includes('-')
+    setTickerHints(prev => ({ ...prev, [i]: needsSuffix }))
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -100,13 +108,15 @@ export default function PortfolioBuilder({ onSimulate, loading, defaults }: Prop
         </div>
 
         {rows.map((row, i) => (
-          <div key={i} className="flex gap-2 items-center">
+          <div key={i} className="space-y-1">
+          <div className="flex gap-2 items-center">
             <input
               type="text"
               value={row.ticker}
               onChange={e => updateRow(i, 'ticker', e.target.value.toUpperCase())}
+              onBlur={e => handleTickerBlur(i, e.target.value)}
               placeholder="PETR4"
-              maxLength={10}
+              maxLength={12}
               className="w-24 shrink-0 bg-zinc-950 text-zinc-100 placeholder-zinc-700 rounded-lg px-3 py-2 text-sm font-mono border border-white/[0.08] focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-colors"
             />
             <div className="relative flex-1">
@@ -134,6 +144,12 @@ export default function PortfolioBuilder({ onSimulate, loading, defaults }: Prop
                 <path d="M1 1L9 9M9 1L1 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
             </button>
+          </div>
+          {tickerHints[i] && (
+            <p className="text-[11px] text-amber-500/80 pl-1">
+              Ticker BR usa sufixo .SA (ex: {row.ticker || 'PETR4'}.SA)
+            </p>
+          )}
           </div>
         ))}
 

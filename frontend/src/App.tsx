@@ -4,6 +4,7 @@ import PerformanceChart from './components/PerformanceChart'
 import MetricsPanel from './components/MetricsPanel'
 import ShareLink from './components/ShareLink'
 import { usePortfolioSimulation } from './hooks/usePortfolioSimulation'
+import type { ErrorKind } from './hooks/usePortfolioSimulation'
 import type { PortfolioBuilderDefaults, RebalanceFrequency, SimulateRequest } from './types'
 
 function parseUrlDefaults(): PortfolioBuilderDefaults {
@@ -22,6 +23,41 @@ function parseUrlDefaults(): PortfolioBuilderDefaults {
     monthlyContrib: p.get('contrib') ?? '0',
     rebalFreq: (p.get('rebal') ?? 'none') as RebalanceFrequency,
   }
+}
+
+const ERROR_HINTS: Record<NonNullable<ErrorKind>, string> = {
+  ticker: 'Verifique se o ticker existe e usa sufixo .SA para acoes brasileiras (ex: PETR4.SA).',
+  source: 'Fonte de dados indisponivel. Tente novamente em alguns minutos.',
+  network: 'Nao foi possivel conectar ao servidor.',
+}
+
+function ErrorBanner({
+  message,
+  kind,
+  onRetry,
+}: {
+  message: string
+  kind: ErrorKind
+  onRetry: () => void
+}) {
+  const hint = kind ? ERROR_HINTS[kind] : null
+  const canRetry = kind === 'source' || kind === 'network'
+
+  return (
+    <div className="rounded-lg border border-rose-500/20 bg-rose-500/[0.08] px-4 py-3 space-y-1.5">
+      <p className="text-sm text-rose-300">{message}</p>
+      {hint && <p className="text-xs text-rose-400/70">{hint}</p>}
+      {canRetry && (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="text-xs text-rose-300 underline underline-offset-2 hover:text-rose-200 transition-colors"
+        >
+          Tentar novamente
+        </button>
+      )}
+    </div>
+  )
 }
 
 function EmptyState() {
@@ -73,21 +109,15 @@ function LoadingSkeleton() {
   )
 }
 
-function ErrorBanner({ message }: { message: string }) {
-  return (
-    <div className="rounded-lg border border-rose-500/20 bg-rose-500/[0.08] px-4 py-3 text-sm text-rose-300 leading-relaxed">
-      {message}
-    </div>
-  )
-}
-
 export default function App() {
-  const { data, loading, error, simulate } = usePortfolioSimulation()
+  const { data, loading, error, errorKind, simulate, retry } = usePortfolioSimulation()
   const [lastRequest, setLastRequest] = useState<SimulateRequest | null>(null)
+  const [simCount, setSimCount] = useState(0)
   const [urlDefaults] = useState<PortfolioBuilderDefaults>(parseUrlDefaults)
 
   function handleSimulate(req: SimulateRequest) {
     setLastRequest(req)
+    setSimCount(c => c + 1)
     simulate(req)
   }
 
@@ -98,7 +128,7 @@ export default function App() {
           Portfolio<span className="text-emerald-400">Replay</span>
         </span>
         <span className="hidden sm:block text-zinc-600 text-xs">
-          simulador de carteira historica
+          Simulador de Carteira Historica
         </span>
       </header>
 
@@ -114,11 +144,11 @@ export default function App() {
         </aside>
 
         <main className="flex-1 p-5 md:p-6 space-y-4">
-          {error && <ErrorBanner message={error} />}
+          {error && <ErrorBanner message={error} kind={errorKind} onRetry={retry} />}
           {loading && <LoadingSkeleton />}
           {data && !loading && (
             <>
-              <MetricsPanel metrics={data.metrics} />
+              <MetricsPanel key={simCount} metrics={data.metrics} />
               <PerformanceChart timeline={data.timeline} />
               {lastRequest && <ShareLink request={lastRequest} />}
             </>
